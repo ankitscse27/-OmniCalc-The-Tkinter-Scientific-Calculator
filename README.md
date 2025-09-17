@@ -1,14 +1,7 @@
-# -OmniCalc-The-Tkinter-Scientific-Calculator
-OmniCalc: The sleek, dark-mode scientific calculator for students and pros. Built with Python, it masters advanced trig, logs, and more with a secure engine and full keyboard support
-
-🚀 Engineering Scientific Calculator 🚀
-A feature-rich, modern scientific calculator built with Python and Tkinter. This project provides a fully functional calculator with a sleek, dark-themed user interface, responsive design, and robust error handling.
-
-(To create a GIF like this, you can use a free tool like ScreenToGif or LICEcap. Upload the GIF to a site like Imgur and paste the link here.)
+OmniCalc: The Tkinter Scientific Calculator
+OmniCalc is a sleek, feature-rich scientific calculator built with Python and Tkinter. Designed with a modern dark-mode UI, it's perfect for students and professionals who need a powerful yet intuitive tool for advanced calculations.
 
 ✨ Key Features
-This calculator goes beyond the basics, offering a wide range of scientific and engineering functions:
-
 🔢 Standard Arithmetic: Addition, subtraction, multiplication, and division.
 
 🔬 Scientific Functions:
@@ -48,70 +41,51 @@ Modules: math, re
 To run this calculator on your local machine, follow these simple steps.
 
 Prerequisites
-You need to have Python 3 installed. You can download it from python.org. Tkinter is included with most Python installations, so no external libraries are needed.
+You need to have Python 3 installed. Tkinter is included with most Python installations, so no external libraries are needed.
 
 Installation & Execution
 Clone the repository:
 
 Bash
 
-git clone https://github.com/your-username/your-repository-name.git
+git clone https://github.com/ankitscse27/OmniCalc-The-Tkinter-Scientific-Calculator.git
 Navigate to the project directory:
 
 Bash
 
-cd your-repository-name
+cd OmniCalc-The-Tkinter-Scientific-Calculator
 Run the script:
 
 Bash
 
-python calculator_script_name.py
-(Replace calculator_script_name.py with the actual name of your Python file.)
+python main.py
+(Note: Replace main.py with the actual name of your Python file.)
 
-And that's it! The calculator window should now appear on your screen.
+The calculator window should now appear on your screen!
 
 🔎 Code Overview
-The code is organized within a single class, ScientificCalculator, for clarity and encapsulation.
+The code is neatly organized within the ScientificCalculator class for clarity and encapsulation.
 
-Style (Inner Class):
+Style (Inner Class): Centralizes all styling constants (colors, fonts). This makes it incredibly easy to change the application's theme.
 
-Centralizes all styling constants (colors, fonts). This makes it incredibly easy to change the theme of the entire application without hunting through the code.
+__init__(self, master): The constructor initializes the main window, sets up state variables (like expression, is_deg_mode), and calls the methods to build the UI.
 
-__init__(self, master) (Constructor):
+UI Creation (_create... methods): The UI is logically divided into a display_frame and a buttons_frame. The _get_button_definitions() method defines the entire layout in a single, easy-to-read list of dictionaries, making modifications straightforward.
 
-Initializes the main window, sets up state variables (like expression, is_deg_mode), and calls the methods to build the UI.
+Core Logic (evaluate, _preprocess_expression): evaluate() is the heart of the calculation, using a safe eval() with a predefined dictionary of math functions to ensure security. The _preprocess_expression() method intelligently handles DEG/RAD mode conversions before evaluation.
 
-UI Creation (_create_... methods):
-
-The UI is logically divided into a display_frame and a buttons_frame.
-
-_get_button_definitions() defines the entire button layout in a single, easy-to-read list of dictionaries. This approach makes modifying the layout straightforward.
-
-Buttons are created dynamically based on this list, with hover effects bound to each one for better user feedback.
-
-Core Logic (evaluate, _preprocess_expression):
-
-evaluate() is the heart of the calculation. It uses a safe eval() by providing a safe_dict containing only allowed mathematical functions from the math library. This is a critical security feature.
-
-_preprocess_expression() intelligently handles DEG/RAD conversions by swapping functions like sin with sind (a custom lambda for degree calculations) before evaluation.
-
-Functionality (toggle_..., memory_...):
-
-toggle_second_mode() dynamically changes the text and command of multiple buttons, effectively doubling their functionality without cluttering the UI.
-
-Memory and utility functions (clear, backspace) provide the complete calculator experience.
+Functionality (toggle_..., memory_...): toggle_second_mode() dynamically changes the text and command of multiple buttons, effectively doubling their functionality. Memory and other utility functions provide the complete calculator experience.
 
 ⌨️ Keyboard Shortcuts
-For efficiency, the calculator can be operated using your keyboard:
+For efficiency, the calculator can be operated entirely with your keyboard:
 
 Key(s)	Action
 0-9, .	Enter numbers
-+, -, /	Basic arithmetic operators
-*	Multiplication (×)
-( )	Add parentheses
-Enter	Calculate the result (=)
-Backspace	Delete last character
-Escape	Clear the entire input
++, -, /, *	Basic arithmetic operators
+(, )	Add parentheses
+Enter / Return	Calculate the result (=)
+Backspace	Delete the last character
+Escape	Clear the entire input (C)
 
 Export to Sheets
 👤 Author
