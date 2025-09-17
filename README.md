@@ -48,7 +48,7 @@ Clone the repository:
 
 Bash
 
-git clone https://github.com/ankitscse27/OmniCalc-The-Tkinter-Scientific-Calculator.git
+git clone https://github.com/ankitscse27/-OmniCalc-The-Tkinter-Scientific-Calculator.git
 Navigate to the project directory:
 
 Bash
