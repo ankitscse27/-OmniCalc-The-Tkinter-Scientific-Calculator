@@ -78,7 +78,6 @@ Functionality (toggle_..., memory_...): toggle_second_mode() dynamically changes
 
 ⌨️ Keyboard Shortcuts
 For efficiency, the calculator can be operated entirely with your keyboard:
-
 Key(s)	Action
 0-9, .	Enter numbers
 +, -, /, *	Basic arithmetic operators
@@ -87,7 +86,7 @@ Enter / Return	Calculate the result (=)
 Backspace	Delete the last character
 Escape	Clear the entire input (C)
 
-Export to Sheets
+
 👤 Author
 Ankit Singh
 
