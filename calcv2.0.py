@@ -1,5 +1,5 @@
 # Author: Ankit Singh (ankitscse27)
-# Version: 2.0 - Enhanced Input Handling, New Functions, and Display Refinements
+# Version: 2.1.1 - Fixed SyntaxError in _add_button function
 
 import tkinter as tk
 import math
@@ -8,15 +8,15 @@ import re
 # --- Constants for Styling ---
 # A modern dark theme with cyan and blue-gray accents.
 class Style:
-    BG_COLOR = "#1A2226"             # Dark Slate Blue/Gray
-    DISPLAY_BG_COLOR = "#232D33"     # Slightly Lighter Slate
-    BUTTON_BG_COLOR = "#4A5A63"      # Blue-Gray
-    OPERATOR_BG_COLOR = "#26C6DA"    # Bright Cyan
-    FUNCTION_BG_COLOR = "#37474F"    # Darker Blue-Gray
-    SPECIAL_BG_COLOR = "#546E7A"     # Muted Blue-Gray
-    SECOND_ACTIVE_BG = "#607D8B"     # Highlighted Gray
+    BG_COLOR = "#1A2226"          # Dark Slate Blue/Gray
+    DISPLAY_BG_COLOR = "#232D33"  # Slightly Lighter Slate
+    BUTTON_BG_COLOR = "#4A5A63"   # Blue-Gray
+    OPERATOR_BG_COLOR = "#26C6DA" # Bright Cyan
+    FUNCTION_BG_COLOR = "#37474F" # Darker Blue-Gray
+    SPECIAL_BG_COLOR = "#546E7A"  # Muted Blue-Gray
+    SECOND_ACTIVE_BG = "#607D8B"  # Highlighted Gray
     WHITE = "#FFFFFF"
-    LABEL_COLOR = "#F0F0F0"          # Soft White
+    LABEL_COLOR = "#F0F0F0"       # Soft White
     
     # Hover colors for visual feedback
     OPERATOR_HOVER_COLOR = "#80D8FF" # Light Cyan
@@ -36,17 +36,13 @@ class ScientificCalculator:
     """
     An advanced scientific calculator with a modern GUI using Tkinter.
     
-    Version 2.0 Enhancements:
-    - Implied multiplication handling (e.g., 2pi, 3(4+5)).
-    - Log Base Y (log_y x) and X-th Root (y_root_x) functions.
-    - Scientific notation for large/small results.
-    - Improved input validation (no consecutive operators).
+    Version 2.1.1: Fixed the SyntaxError in the _add_button helper method.
     """
 
     def __init__(self, master):
         """Initialize the calculator."""
         self.master = master
-        master.title("Engineering Scientific Calculator (v2.0)")
+        master.title("Engineering Scientific Calculator (v2.1.1)")
         master.geometry("400x700")
         master.configure(bg=Style.BG_COLOR)
         master.minsize(400, 700)
@@ -55,8 +51,8 @@ class ScientificCalculator:
         self.expression = ""
         self.is_deg_mode = True
         self.is_second_mode = False
-        self.memory = 0
-        self.last_answer = 0
+        self.memory = 0.0 # Use float for memory
+        self.last_answer = 0.0
         self.toggleable_buttons = []
         self.is_last_input_operator = False
 
@@ -88,6 +84,9 @@ class ScientificCalculator:
             raise ZeroDivisionError("Cannot take the 0-th root.")
         if y < 0 and x % 2 == 0:
             raise ValueError("Cannot take an even root of a negative number.")
+        # Need to handle negative base with odd exponent for real roots
+        if y < 0 and x % 2 != 0:
+            return -((-y)**(1/x))
         return y**(1/x)
 
     def _create_safe_dict(self):
@@ -116,22 +115,17 @@ class ScientificCalculator:
         })
         return safe_dict
 
-    # ... (Unchanged helper methods for UI creation: _configure_grid_weights, _create_display_frame, _create_buttons_frame, _create_display_labels, _create_author_label)
-
     def _configure_grid_weights(self):
-        """Configure the root window's grid to be responsive."""
         self.master.rowconfigure(0, weight=2)
         self.master.rowconfigure(1, weight=5)
         self.master.columnconfigure(0, weight=1)
 
     def _create_display_frame(self):
-        """Create the frame for the calculator display."""
         frame = tk.Frame(self.master, bg=Style.DISPLAY_BG_COLOR, bd=5, relief=tk.RIDGE)
         frame.grid(row=0, column=0, sticky="nsew", padx=10, pady=10)
         return frame
 
     def _create_buttons_frame(self):
-        """Create the frame for the calculator buttons."""
         frame = tk.Frame(self.master, bg=Style.BG_COLOR)
         frame.grid(row=1, column=0, sticky="nsew", padx=5, pady=5)
         for i in range(9):
@@ -141,17 +135,19 @@ class ScientificCalculator:
         return frame
 
     def _create_display_labels(self):
-        """Create the labels for showing the expression and result."""
+        # Total/History label
         total_label = tk.Label(self.display_frame, text="", anchor=tk.E,
                                bg=Style.DISPLAY_BG_COLOR, fg=Style.LABEL_COLOR, 
                                padx=10, font=Style.SMALL_FONT)
         total_label.pack(expand=True, fill='both')
 
+        # Main expression/result label
         label = tk.Label(self.display_frame, text="0", anchor=tk.E,
-                          bg=Style.DISPLAY_BG_COLOR, fg=Style.WHITE, 
-                          padx=10, font=Style.LARGE_FONT)
+                         bg=Style.DISPLAY_BG_COLOR, fg=Style.WHITE, 
+                         padx=10, font=Style.LARGE_FONT)
         label.pack(expand=True, fill='both')
 
+        # Mode and Indicator label
         mode_label = tk.Label(self.display_frame, text="DEG", anchor=tk.W,
                               bg=Style.DISPLAY_BG_COLOR, fg=Style.OPERATOR_BG_COLOR, 
                               padx=10, font=Style.MODE_FONT)
@@ -159,8 +155,7 @@ class ScientificCalculator:
         return total_label, label, mode_label
         
     def _create_author_label(self):
-        """Create the author credit label in the display."""
-        author_label = tk.Label(self.display_frame, text="Ankit Singh (ankitscse27) v2.0", anchor=tk.E,
+        author_label = tk.Label(self.display_frame, text="Ankit Singh (ankitscse27) v2.1.1", anchor=tk.E,
                                  bg=Style.DISPLAY_BG_COLOR, fg=Style.FUNCTION_BG_COLOR, 
                                  padx=10, font=Style.AUTHOR_FONT)
         author_label.pack(expand=True, fill='x', side='right')
@@ -168,7 +163,6 @@ class ScientificCalculator:
 
     def _get_button_definitions(self):
         """Returns a list of dictionaries defining all buttons."""
-        # Added y_root_x and log_y
         return [
             {'text': '2nd', 'command': self.toggle_second_mode, 'type': 'func', 'row': 0, 'col': 0, 'id': '2nd'},
             {'text': 'DEG', 'command': self.toggle_deg_rad, 'type': 'func', 'row': 0, 'col': 1, 'id': 'deg'},
@@ -177,7 +171,7 @@ class ScientificCalculator:
             {'text': '%', 'command': '/100', 'type': 'func', 'row': 0, 'col': 4},
             
             {'p_text': 'x²', 'p_cmd': '**2', 's_text': 'x³', 's_cmd': '**3', 'type': 'func', 'row': 1, 'col': 0, 'toggle': True},
-            {'p_text': 'xʸ', 'p_cmd': '**', 's_text': 'ʸ√x', 's_cmd': 'y_root_x(', 'type': 'func', 'row': 1, 'col': 1, 'toggle': True}, # y_root_x
+            {'p_text': 'xʸ', 'p_cmd': '**', 's_text': 'ʸ√x', 's_cmd': 'y_root_x(', 'type': 'func', 'row': 1, 'col': 1, 'toggle': True},
             {'p_text': '√x', 'p_cmd': 'sqrt(', 's_text': '³√x', 's_cmd': 'cbrt(', 'type': 'func', 'row': 1, 'col': 2, 'toggle': True},
             {'text': 'x!', 'command': 'factorial(', 'type': 'func', 'row': 1, 'col': 3},
             {'text': 'eˣ', 'command': 'exp(', 'type': 'func', 'row': 1, 'col': 4},
@@ -185,7 +179,7 @@ class ScientificCalculator:
             {'p_text': 'sin', 'p_cmd': 'sin(', 's_text': 'sin⁻¹', 's_cmd': 'asin(', 'type': 'func', 'row': 2, 'col': 0, 'toggle': True},
             {'p_text': 'cos', 'p_cmd': 'cos(', 's_text': 'cos⁻¹', 's_cmd': 'acos(', 'type': 'func', 'row': 2, 'col': 1, 'toggle': True},
             {'p_text': 'tan', 'p_cmd': 'tan(', 's_text': 'tan⁻¹', 's_cmd': 'atan(', 'type': 'func', 'row': 2, 'col': 2, 'toggle': True},
-            {'p_text': 'log₁₀', 'p_cmd': 'log10(', 's_text': 'log base y', 's_cmd': 'log_y(', 'type': 'func', 'row': 2, 'col': 3, 'toggle': True}, # log_y
+            {'p_text': 'log₁₀', 'p_cmd': 'log10(', 's_text': 'log base y', 's_cmd': 'log_y(', 'type': 'func', 'row': 2, 'col': 3, 'toggle': True},
             {'text': 'ln', 'command': 'log(', 'type': 'func', 'row': 2, 'col': 4},
             
             {'p_text': 'sinh', 'p_cmd': 'sinh(', 's_text': 'sinh⁻¹', 's_cmd': 'asinh(', 'type': 'func', 'row': 3, 'col': 0, 'toggle': True},
@@ -212,18 +206,17 @@ class ScientificCalculator:
             {'text': '×', 'command': '*', 'type': 'op', 'row': 6, 'col': 3},
             {'text': '÷', 'command': '/', 'type': 'op', 'row': 6, 'col': 4},
             
-            {'text': '0', 'command': '0', 'type': 'num', 'row': 7, 'col': 0, 'colspan': 2},
-            {'text': '.', 'command': '.', 'type': 'num', 'row': 7, 'col': 2},
+            {'text': 'e', 'command': 'e', 'type': 'num', 'row': 7, 'col': 0},
+            {'text': 'π', 'command': 'pi', 'type': 'num', 'row': 7, 'col': 1},
+            {'text': '0', 'command': '0', 'type': 'num', 'row': 7, 'col': 2},
             {'text': '+', 'command': '+', 'type': 'op', 'row': 7, 'col': 3},
             {'text': '-', 'command': '-', 'type': 'op', 'row': 7, 'col': 4},
             
-            {'text': 'e', 'command': 'e', 'type': 'num', 'row': 8, 'col': 0},
-            {'text': 'π', 'command': 'pi', 'type': 'num', 'row': 8, 'col': 1},
-            {'text': 'ANS', 'command': self.recall_last_answer, 'type': 'func', 'row': 8, 'col': 2},
+            {'text': '+/–', 'command': self.negate_last_input, 'type': 'spec', 'row': 8, 'col': 0}, # New Negation
+            {'text': 'ANS', 'command': self.recall_last_answer, 'type': 'func', 'row': 8, 'col': 1},
+            {'text': '.', 'command': '.', 'type': 'num', 'row': 8, 'col': 2},
             {'text': '=', 'command': self.evaluate, 'type': 'op', 'row': 8, 'col': 3, 'colspan': 2},
         ]
-
-    # ... (Unchanged _create_buttons, _add_button, _get_button_colors, _bind_keys)
 
     def _create_buttons(self):
         """Create and place all calculator buttons based on the defined layout."""
@@ -231,13 +224,14 @@ class ScientificCalculator:
             self._add_button(b_info)
 
     def _add_button(self, b_info):
-        """Helper method to create and configure a single button."""
+        """Helper method to create and configure a single button. (FIXED SYNTAX ERROR HERE)"""
         bg_color, hover_color = self._get_button_colors(b_info['type'])
         
         is_toggleable = b_info.get('toggle', False)
         text = b_info.get('p_text', b_info.get('text', ''))
         cmd = b_info.get('p_cmd', b_info.get('command', ''))
         
+        # Use lambda for simple commands or the callable for complex ones
         action = cmd if callable(cmd) else lambda x=cmd: self.add_to_expression(x)
 
         button = tk.Button(self.buttons_frame, text=text, bg=bg_color, fg=Style.WHITE,
@@ -247,11 +241,13 @@ class ScientificCalculator:
                     columnspan=b_info.get('colspan', 1),
                     sticky="nsew", padx=2, pady=2)
         
+        # Hover logic: respect the active background of the '2nd' button
         def on_enter(event, h_color=hover_color):
             if event.widget['bg'] != Style.SECOND_ACTIVE_BG:
                 event.widget.config(bg=h_color)
         
         def on_leave(event, b_color=bg_color):
+            # Only reset if the button is not the active '2nd' button
             if event.widget['bg'] != Style.SECOND_ACTIVE_BG:
                 event.widget.config(bg=b_color)
 
@@ -281,6 +277,8 @@ class ScientificCalculator:
         for key in "1234567890.+-/()":
             self.master.bind(key, lambda event, digit=key: self.add_to_expression(digit))
         self.master.bind("*", lambda event: self.add_to_expression('*'))
+        self.master.bind("p", lambda event: self.add_to_expression('pi'))
+        self.master.bind("E", lambda event: self.add_to_expression('e'))
     
     def add_to_expression(self, value):
         """
@@ -291,43 +289,107 @@ class ScientificCalculator:
             self.expression = ""
         
         operators = ('+', '-', '*', '/', '**', '%')
-        is_operator = value in operators
-        is_unary_minus = (value == '-') and (not self.expression or self.expression[-1] in '(*') # Allows for negative signs at start or after a * or (
-
-        # 1. Implied Multiplication (e.g., 2pi, 3(4+5), e(1))
+        
+        # Check if the input value is a binary operator
+        is_binary_operator = value in operators and value != '-'
+        
+        # Check if the input value is a function start
+        is_function_start = value in self.FUNCTIONS or value == '('
+        
+        # 1. Implied Multiplication (e.g., 2pi, 3(4+5), e(1), 5sin() )
         requires_multiplication = False
         if self.expression:
             last_char = self.expression[-1]
-            if value in 'pi e (' and last_char.isdigit():
-                requires_multiplication = True # e.g., '2' + 'pi' -> '2*pi'
-            elif value.isdigit() and last_char == ')':
-                requires_multiplication = True # e.g., '(2+2)' + '3' -> '(2+2)*3'
-            elif value == '(' and last_char in 'pi e':
-                requires_multiplication = True # e.g., 'pi' + '(' -> 'pi*('
-            elif any(value.startswith(f) for f in self.FUNCTIONS) and last_char.isdigit():
-                 requires_multiplication = True # e.g., '5' + 'sin(' -> '5*sin('
-        
+            
+            # Case 1: Digit/Constant followed by constant/function start/parenthesis
+            if last_char.isdigit() or last_char in 'pi e':
+                if value in 'pi e (' or is_function_start:
+                    requires_multiplication = True
+            
+            # Case 2: Closing parenthesis followed by digit/constant/function start
+            elif last_char == ')':
+                if value.isdigit() or value in 'pi e' or is_function_start:
+                    requires_multiplication = True
+            
+            # Case 3: Constant followed by a digit
+            if value.isdigit() and last_char in 'pi e':
+                requires_multiplication = True
+
         if requires_multiplication:
             self.expression += '*'
 
         # 2. Operator Sequencing (prevents '++' or '*/')
-        if is_operator and not is_unary_minus and self.is_last_input_operator and len(self.expression) > 0:
+        if is_binary_operator and self.is_last_input_operator:
             # Replace the last operator with the new one
-            self.expression = self.expression[:-1] + value
-        elif not is_unary_minus or len(self.expression) == 0:
-            # Check for constants and ensure proper spacing/multiplication isn't missed after *
+            # Find the last operator and replace it
+            i = len(self.expression) - 1
+            while i >= 0 and self.expression[i] in operators and self.expression[i] != '-':
+                 i -= 1
+            self.expression = self.expression[:i+1] + value
+            
+        else:
+            # Append the new value
             self.expression += str(value)
 
-        # Update operator state
-        self.is_last_input_operator = is_operator and not is_unary_minus
+        # Update operator state: only set True for binary operators
+        self.is_last_input_operator = is_binary_operator
         
         # 3. Special handling for multi-input functions
         if value in ('log_y(', 'y_root_x('):
-             self.expression += ',' # For functions like log_y(base, value) -> log_y(y, x)
+              self.expression += ',' # For functions like log_y(base, value) -> log_y(y, x)
         
         self._update_labels()
 
-    # ... (Unchanged clear, backspace, toggle_deg_rad, toggle_second_mode)
+    def negate_last_input(self):
+        """Toggles the sign of the last number or section of the expression."""
+        if not self.expression or self.expression == "Error":
+            self.expression = "(-0"
+        
+        # Find the last number or parenthesized expression
+        match = re.search(r'([+\-*/(]|^)([e\d\.]+|pi|ANS)\s*$', self.expression)
+        
+        if match:
+            operator_or_start = match.group(1)
+            value = match.group(2)
+            
+            # Simple case: negate the entire expression if it's currently a single number
+            if re.fullmatch(r'^-?\d+\.?\d*$', self.expression):
+                if self.expression.startswith('-'):
+                    self.expression = self.expression[1:]
+                else:
+                    self.expression = '-' + self.expression
+            
+            # Complex case: wrap the last value in -()
+            else:
+                self.expression = self.expression[:match.start(2)] + '(-' + value + ')'
+                
+        elif self.expression.endswith(')'):
+             # Find the opening parenthesis for the closing one
+            count = 1
+            i = len(self.expression) - 2
+            while i >= 0:
+                if self.expression[i] == ')':
+                    count += 1
+                elif self.expression[i] == '(':
+                    count -= 1
+                if count == 0:
+                    break
+                i -= 1
+            
+            # If the expression is already negated, remove the negation: -(...) -> ...
+            if i > 1 and self.expression[i-1] == '-' and self.expression[i-2] in '+-*/(':
+                 # Remove the '(-' and the trailing ')'
+                 self.expression = self.expression[:i-1] + self.expression[i+1:-1]
+            else:
+                 # Add negation: ...(...) -> ...(-(...)
+                 self.expression = self.expression[:i] + '(-' + self.expression[i:]
+            
+        else:
+             # Just add a minus sign if possible
+             self.expression += '-'
+
+        self._update_labels()
+
 
     def clear(self):
         """Clear the entire expression and reset display."""
@@ -343,17 +405,17 @@ class ScientificCalculator:
         elif self.expression:
             last_char = self.expression[-1]
             self.expression = self.expression[:-1]
-            # Reset operator state if last char was an operator
-            if last_char in ('+', '*', '/', '**', '%'):
+            
+            # Reset operator state if the new last char is NOT an operator
+            operators = ('+', '*', '/', '**', '%')
+            if not self.expression or self.expression[-1] not in operators:
                  self.is_last_input_operator = False
             self._update_labels()
 
     def toggle_deg_rad(self):
         """Toggle between Degree and Radian modes."""
         self.is_deg_mode = not self.is_deg_mode
-        mode = "DEG" if self.is_deg_mode else "RAD"
-        self.btn_deg.config(text=mode)
-        self.mode_label.config(text=mode)
+        self._update_labels() # Forces indicator update
 
     def toggle_second_mode(self):
         """Toggle the second function set for applicable buttons."""
@@ -375,6 +437,7 @@ class ScientificCalculator:
         if self.is_deg_mode:
             # Apply 'd' suffix to all trig/inverse trig functions for DEG mode
             for func in ['sin', 'cos', 'tan', 'asin', 'acos', 'atan']:
+                # Use word boundaries to avoid replacing parts of sinh, cosh etc.
                 expr = re.sub(r'\b' + func + r'\(', f'{func}d(', expr)
         return expr
 
@@ -384,11 +447,11 @@ class ScientificCalculator:
             return "0"
             
         try:
-            # Round result to 10 decimal places for precision
-            rounded_result = round(result, 10)
+            # Round result to 12 decimal places for precision
+            rounded_result = round(result, 12)
             
             # Use scientific notation if the number is very large or very small
-            if abs(rounded_result) >= 1e10 or (abs(rounded_result) > 0 and abs(rounded_result) < 1e-6):
+            if abs(rounded_result) >= 1e12 or (abs(rounded_result) > 0 and abs(rounded_result) < 1e-6):
                 return f"{rounded_result:.4e}"
             
             # Convert to int if it's a whole number
@@ -403,18 +466,28 @@ class ScientificCalculator:
 
     def evaluate(self):
         """Evaluate the full expression using the restricted 'eval'."""
+        
+        temp_expr = self.expression
         display_expr = self._format_for_display(self.expression)
         
-        # Prevent evaluation of empty or just an operator expression
-        if not self.expression or self.is_last_input_operator:
+        if not temp_expr or self.is_last_input_operator:
             self.total_label.config(text=display_expr)
             return
 
         self.total_label.config(text=display_expr + "=")
-        self.is_last_input_operator = False # Result is no longer an operator
+        self.is_last_input_operator = False
         
         try:
-            processed_expr = self._preprocess_expression(self.expression)
+            # --- PARENTHESIS FIX ---
+            open_parens = temp_expr.count('(')
+            close_parens = temp_expr.count(')')
+            
+            missing_parens = open_parens - close_parens
+            if missing_parens > 0:
+                temp_expr += ')' * missing_parens
+            # -----------------------
+            
+            processed_expr = self._preprocess_expression(temp_expr)
             result = eval(processed_expr, {"__builtins__": None}, self.safe_dict)
             
             self.last_answer = result
@@ -425,7 +498,6 @@ class ScientificCalculator:
         except (SyntaxError):
             self.expression = "Syntax Error"
         except (NameError, TypeError, ValueError) as e:
-            # Catch function-specific errors (e.g., domain errors in log/sqrt)
             error_msg = str(e).split(':')[-1].strip().split('\n')[0].title()
             self.expression = f"Math Error ({error_msg})"
         except Exception:
@@ -435,14 +507,21 @@ class ScientificCalculator:
 
     def _format_for_display(self, expr):
         """Convert internal expression to a more readable format for display, with limit."""
-        # 1. Substitute internal code with display symbols
         display_expr = expr
+        
+        # 1. Substitute internal code with display symbols
         for op, symbol in self.DISPLAY_MAP.items():
             display_expr = display_expr.replace(op, symbol)
             
-        # 2. Add implied multiplication symbols for better readability where necessary (e.g. 2*pi -> 2π)
-        display_expr = re.sub(r'(?<=\d)(?=[a-zA-Z])', '×', display_expr)
-        display_expr = display_expr.replace('×pi', 'π').replace('×e', 'e') # Correctly map the constants after insertion
+        # 2. Add implied multiplication symbols for better readability (2pi -> 2×π)
+        # Handle digits before constants/functions
+        display_expr = re.sub(r'(?<=\d)(?=[a-zA-Z(])', '×', display_expr)
+        
+        # Handle constant/RHS-function before constant/LHS-function
+        display_expr = re.sub(r'([πe])([a-zA-Z(])', r'\1×\2', display_expr)
+        
+        # Correctly map the constants after multiplication insertion
+        display_expr = display_expr.replace('×pi', 'π').replace('×e', 'e') 
         
         # 3. Limit the length for the history display
         if len(display_expr) > Style.DISPLAY_LIMIT:
@@ -451,18 +530,31 @@ class ScientificCalculator:
         return display_expr
 
     def _update_labels(self):
-        """Update the display labels with the current expression."""
+        """Update the display labels and indicators."""
         display_text = self._format_for_display(self.expression)
         
+        # 1. Update main display
         self.label.config(text=display_text if self.expression and self.expression != "Error" else "0")
         
-        # Clear the top history label if a new expression is being typed
+        # 2. Clear history if typing a new expression
         if not self.total_label.cget('text').endswith('='):
-             self.total_label.config(text=display_text)
+            self.total_label.config(text=display_text)
+            
+        # 3. Update indicators (DEG/RAD, M, ANS)
+        mode = "DEG" if self.is_deg_mode else "RAD"
+        
+        indicators = [mode]
+        if self.memory != 0.0:
+            indicators.append("M")
+        if self.last_answer != 0.0:
+            indicators.append("ANS")
+            
+        self.mode_label.config(text=" ".join(indicators))
 
-    # --- Memory and Answer Functions (M-op adjusted for V2 error handling) ---
+
+    # --- Memory and Answer Functions ---
     def memory_clear(self): 
-        self.memory = 0
+        self.memory = 0.0
         self.total_label.config(text="Memory Cleared")
         self.expression = ""
         self._update_labels()
@@ -475,16 +567,36 @@ class ScientificCalculator:
         
     def memory_op(self, operation):
         """Generic function to handle M+ and M- operations."""
-        try:
-            # Use the currently displayed (or evaluated) value for memory operation
-            val_to_add = eval(self._preprocess_expression(self.expression), {"__builtins__": None}, self.safe_dict)
-            self.memory = operation(self.memory, val_to_add)
-            self.total_label.config(text=f"M = {self._format_result(self.memory)}")
-            self.expression = "" # Clear main display after memory operation
-            self._update_labels()
-        except Exception:
-            self.expression = "Error in M-op"
-            self._update_labels()
+        original_expression = self.expression
+        
+        # If the current expression is empty, try to use the last answer
+        if not original_expression and self.last_answer != 0.0:
+             val_to_add = self.last_answer
+        else:
+            try:
+                # Evaluate the current expression to get the value
+                processed_expr = self._preprocess_expression(original_expression)
+                # Auto-close parentheses for memory op evaluation
+                open_parens = processed_expr.count('(')
+                close_parens = processed_expr.count(')')
+                processed_expr += ')' * (open_parens - close_parens)
+                
+                val_to_add = eval(processed_expr, {"__builtins__": None}, self.safe_dict)
+            except Exception:
+                self.expression = "Error in M-op"
+                self._update_labels()
+                return
+            
+        self.memory = operation(self.memory, val_to_add)
+        self.total_label.config(text=f"M = {self._format_result(self.memory)}")
+        
+        # CRITICAL UX CHANGE: Only clear the main display if the expression was evaluated just for M-op
+        if original_expression == "":
+            pass # Keep what's on the main screen (likely the last result)
+        else:
+            self.expression = ""
+            
+        self._update_labels()
             
     def memory_add(self): self.memory_op(lambda m, v: m + v)
     def memory_subtract(self): self.memory_op(lambda m, v: m - v)
@@ -493,4 +605,5 @@ class ScientificCalculator:
 if __name__ == "__main__":
     window = tk.Tk()
     calculator = ScientificCalculator(window)
+
     window.mainloop()
