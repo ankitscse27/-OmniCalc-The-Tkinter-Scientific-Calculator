@@ -15,11 +15,12 @@ OmniCalc provides a comprehensive set of functions while prioritizing user exper
 | Category | Functions |
 | :--- | :--- |
 | **Basic Arithmetic** | Addition ($+$), Subtraction ($-$), Multiplication ($\times$), Division ($\div$) |
-| **Powers & Roots** | $x^y$, $x^2$, $x^3$, $\sqrt{x}$, $\sqrt[3]{x}$, $e^x$ |
+| **Powers & Roots** | $x^y$, $x^2$, $x^3$, $\sqrt{x}$, $\sqrt[3]{x}$, $e^x$, **$y^{1/x}$ (x-th root of y)** |
 | **Trigonometry** | $\sin$, $\cos$, $\tan$, and their **Inverse** ($\sin^{-1}, \cos^{-1}, \tan^{-1}$) and **Hyperbolic** ($\sinh, \cosh, \tanh$) counterparts. |
-| **Logarithms** | $\log_{10}$, $\ln$ (Natural Logarithm) |
+| **Logarithms** | $\log_{10}$, $\ln$ (Natural Logarithm), **$\log_y(x)$ (Log base y of x)** |
+| **Modes** | Toggle between **DEG** (Degrees) and **RAD** (Radians) for trigonometric calculations. |
 | **Constants** | $\pi$, $e$ |
-| **Utility** | Factorial ($x!$), Percentage ($\%$), and an **ANS** key to recall the last result. |
+| **Utility** | Factorial ($x!$), Percentage ($\%$), **Negation ($\pm$)**, and an **ANS** key to recall the last result. |
 
 ### 🧠 Memory Management
 Full memory functionality including:
@@ -32,7 +33,10 @@ Full memory functionality including:
 * **Dark Mode Theme:** Visually appealing, professional, and easy on the eyes.
 * **Multi-Line Display:** Clearly separates the current expression from the final, evaluated result.
 * **Responsive Layout:** Adapts dynamically to window resizing.
+* **Dynamic Indicators (M/ANS/DEG/RAD):** Provides clear visual cues on the current mode and active memory/answer status.
 * **Full Keyboard Support:** Dedicated keyboard bindings for a faster, professional workflow.
+* **Auto-Parenthesis Closing:** Automatically closes unmatched parentheses upon evaluation.
+* **Implied Multiplication:** Automatically inserts the multiplication operator (`*`) between numbers and functions (e.g., `2sin(30)`).
 
 ### 🛡️ Secure Evaluation
 Calculations are performed using a **restricted `eval()`** method paired with a carefully curated dictionary of safe mathematical functions (`math` module). This approach prevents the execution of malicious code, enhancing application security.
@@ -53,7 +57,7 @@ The architecture is designed for clarity, maintainability, and extensibility, en
 | :--- | :--- | :--- |
 | **`Style` Class** | Centralizes all application constants (colors, fonts, padding). | Facilitates **rapid theme switching** and styling consistency. |
 | **UI Creation** | Defines the layout of the display and all button elements. | Uses a single, declarative list of dictionaries (`_get_button_definitions`) for easy layout modification. |
-| **Core Logic** | Handles input processing, DEG/RAD mode conversion, and evaluation. | `evaluate()` ensures security via restricted function access. |
+| **Core Logic** | Handles input processing, DEG/RAD mode conversion, and evaluation. | `evaluate()` ensures security via restricted function access and includes **auto-parentheses fix**. |
 | **Functionality** | Implements utility features like memory and mode toggles. | `toggle_second_mode()` dynamically changes button commands and labels, effectively doubling the functionality. |
 
 ---
@@ -65,21 +69,21 @@ Ensure you have **Python 3** installed. **Tkinter** is included by default with 
 
 ### Installation and Execution
 
-1.  **Clone the repository:**
-    ```bash
-    git clone [https://github.com/ankitscse27/-OmniCalc-The-Tkinter-Scientific-Calculator.git](https://github.com/ankitscse27/-OmniCalc-The-Tkinter-Scientific-Calculator.git)
-    ```
+1.  **Clone the repository:**
+    ```bash
+    git clone [https://github.com/ankitscse27/-OmniCalc-The-Tkinter-Scientific-Calculator.git](https://github.com/ankitscse27/-OmniCalc-The-Tkinter-Scientific-Calculator.git)
+    ```
 
-2.  **Navigate to the project directory:**
-    ```bash
-    cd OmniCalc-The-Tkinter-Scientific-Calculator
-    ```
+2.  **Navigate to the project directory:**
+    ```bash
+    cd OmniCalc-The-Tkinter-Scientific-Calculator
+    ```
 
-3.  **Run the script:**
-    ```bash
-    python main.py
-    ```
-    *The calculator window will launch immediately.*
+3.  **Run the script:**
+    ```bash
+    python main.py
+    ```
+    *The calculator window will launch immediately.*
 
 ---
 
